@@ -16,6 +16,7 @@ use cryptoki::mechanism::elliptic_curve::{EcKdf, Ecdh1DeriveParams};
 use cryptoki::mechanism::rsa::{PkcsMgfType, PkcsOaepParams, PkcsOaepSource, PkcsPssParams};
 use cryptoki::mechanism::{Mechanism, MechanismType};
 use cryptoki::object::{Attribute, AttributeType, ObjectClass, ObjectHandle};
+use cryptoki::types::Ulong;
 
 use std::path::Path;
 use std::sync::{Arc, Mutex};
@@ -185,7 +186,7 @@ fn signature_mechanism(algo: &SignatureAlgorithm) -> Result<Mechanism<'static>> 
             let pss = PkcsPssParams {
                 hash_alg: hash_mech,
                 mgf,
-                s_len: s_len.into(),
+                s_len: s_len,
             };
             match hash {
                 HashAlgorithm::Sha1 => Ok(Mechanism::Sha1RsaPkcsPss(pss)),
@@ -228,12 +229,12 @@ fn signature_mechanism(algo: &SignatureAlgorithm) -> Result<Mechanism<'static>> 
 }
 
 /// Return `(hash_mechanism_type, mgf, salt_len)` for RSA-PSS.
-fn pss_params_for(hash: HashAlgorithm) -> Result<(MechanismType, PkcsMgfType, u64)> {
+fn pss_params_for(hash: HashAlgorithm) -> Result<(MechanismType, PkcsMgfType, Ulong)> {
     match hash {
-        HashAlgorithm::Sha1 => Ok((MechanismType::SHA1, PkcsMgfType::MGF1_SHA1, 20)),
-        HashAlgorithm::Sha256 => Ok((MechanismType::SHA256, PkcsMgfType::MGF1_SHA256, 32)),
-        HashAlgorithm::Sha384 => Ok((MechanismType::SHA384, PkcsMgfType::MGF1_SHA384, 48)),
-        HashAlgorithm::Sha512 => Ok((MechanismType::SHA512, PkcsMgfType::MGF1_SHA512, 64)),
+        HashAlgorithm::Sha1 => Ok((MechanismType::SHA1, PkcsMgfType::MGF1_SHA1, 20.into())),
+        HashAlgorithm::Sha256 => Ok((MechanismType::SHA256, PkcsMgfType::MGF1_SHA256, 32.into())),
+        HashAlgorithm::Sha384 => Ok((MechanismType::SHA384, PkcsMgfType::MGF1_SHA384, 48.into())),
+        HashAlgorithm::Sha512 => Ok((MechanismType::SHA512, PkcsMgfType::MGF1_SHA512, 64.into())),
         other => Err(Error::UnsupportedAlgorithm(format!(
             "RSA-PSS with {other:?}"
         ))),
@@ -700,7 +701,9 @@ impl KeyAgreement for Pkcs11KeyAgreement {
             Attribute::KeyType(cryptoki::object::KeyType::GENERIC_SECRET),
             Attribute::Encrypt(false),
             Attribute::Decrypt(false),
-            Attribute::ValueLen((self.key_len as u64).into()),
+            Attribute::ValueLen(self.key_len.try_into().map_err(|_| {
+                Error::Pkcs11(format!("key_len {} too large for Ulong", self.key_len))
+            })?),
             Attribute::Extractable(true),
             Attribute::Sensitive(false),
         ];
