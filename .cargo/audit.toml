@@ -33,8 +33,9 @@ ignore = [
     # Note — ml-dsa advisory posture:
     # RUSTSEC-2025-0144 (timing side-channel in ML-DSA decomposition, fixed
     # by replacing hardware division with constant-time Barrett reduction)
-    # is patched in ml-dsa >= 0.1.0-rc.3. Kryptering pins =0.1.0-rc.8, so
-    # this advisory does not fire against our Cargo.lock and needs no
-    # ignore entry. Revisit only if ml-dsa is pinned backward.
+    # is patched in ml-dsa >= 0.1.0-rc.3. Kryptering tracks ml-dsa 0.1.0
+    # (the stable final, >= the patched version), so this advisory does not
+    # fire against our Cargo.lock and needs no ignore entry. Revisit only if
+    # ml-dsa is ever pinned backward to < 0.1.0-rc.3.
     # Upstream: https://github.com/RustCrypto/signatures/security/advisories/GHSA-hcp2-x6j4-29j7
 ]

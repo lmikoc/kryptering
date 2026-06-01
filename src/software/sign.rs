@@ -759,7 +759,7 @@ fn pq_ml_dsa_sign_dispatch(
 #[cfg(feature = "post-quantum")]
 fn pq_ml_dsa_sign<P>(private_der: &[u8], data: &[u8], context: &[u8]) -> Result<Vec<u8>>
 where
-    P: ml_dsa::MlDsaParams + ml_dsa::KeyGen,
+    P: ml_dsa::MlDsaParams,
     P: pkcs8_pq::spki::AssociatedAlgorithmIdentifier<Params = pkcs8_pq::der::AnyRef<'static>>,
 {
     // `getrandom::SysRng` is a zero-sized, stateless, fork-safe wrapper over
@@ -812,7 +812,7 @@ fn pq_ml_dsa_verify<P>(
     context: &[u8],
 ) -> Result<bool>
 where
-    P: ml_dsa::MlDsaParams + ml_dsa::KeyGen,
+    P: ml_dsa::MlDsaParams,
     P: pkcs8_pq::spki::AssociatedAlgorithmIdentifier<Params = pkcs8_pq::der::AnyRef<'static>>,
 {
     use pkcs8_pq::spki::DecodePublicKey;
@@ -867,7 +867,7 @@ pub fn generate_ml_dsa(variant: crate::algorithm::MlDsaVariant) -> Result<Softwa
 
     fn encode_public<P>(seed: &ml_dsa::Seed) -> Result<Vec<u8>>
     where
-        P: ml_dsa::MlDsaParams + ml_dsa::KeyGen,
+        P: ml_dsa::MlDsaParams,
         P: pkcs8_pq::spki::AssociatedAlgorithmIdentifier<Params = pkcs8_pq::der::AnyRef<'static>>,
     {
         let sk = ml_dsa::ExpandedSigningKey::<P>::from_seed(seed);
@@ -1010,7 +1010,7 @@ where
 #[cfg(feature = "post-quantum")]
 fn load_ml_dsa_signing_key<P>(private_der: &[u8]) -> Result<ml_dsa::ExpandedSigningKey<P>>
 where
-    P: ml_dsa::MlDsaParams + ml_dsa::KeyGen,
+    P: ml_dsa::MlDsaParams,
     P: pkcs8_pq::spki::AssociatedAlgorithmIdentifier<Params = pkcs8_pq::der::AnyRef<'static>>,
 {
     // Try full PKCS#8 DER first (RustCrypto format)
