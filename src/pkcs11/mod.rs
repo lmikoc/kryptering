@@ -186,7 +186,7 @@ fn signature_mechanism(algo: &SignatureAlgorithm) -> Result<Mechanism<'static>> 
             let pss = PkcsPssParams {
                 hash_alg: hash_mech,
                 mgf,
-                s_len: s_len,
+                s_len,
             };
             match hash {
                 HashAlgorithm::Sha1 => Ok(Mechanism::Sha1RsaPkcsPss(pss)),
